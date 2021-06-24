@@ -1,0 +1,61 @@
+import requests
+from bs4 import BeautifulSoup as bs
+import pandas as pd
+import numpy as np
+
+data_judul=[]
+data_harga=[]
+data_bangunan=[]
+data_tanah=[]
+data_kamar_tidur=[]
+data_kamar_mandi=[]
+for i in range(1,618):      
+    URL ='https://www.brighton.co.id/cari-properti-surabaya/?Keyword=TANGERANG&OrderBy=5&sortRadio=on&Type=Rumah&Transaction=Jual&Certificate=&Province=&Location=&Area=&Hadap=&KT=&KM=&PriceMin=&PriceMax=&LTMin=&LTMax=&LBMin=&LBMax=&page={}'.format(i)
+    r = requests.get(URL)
+    soup = bs(r.text)
+    
+    luas_bangunan=soup.find_all(attrs={'title':"Luas Bangunan"})
+    platform= soup.find_all(class_="price-property")
+    judul=soup.find_all(class_="title-property max-lines-desc-2")
+    luas_tanah=soup.find_all(attrs={'title':"Luas Tanah"})
+    kamar_tidur=soup.find_all(attrs={'title':"Kamar Tidur"})
+    kamar_mandi=soup.find_all(attrs={'title':"Kamar Mandi"})
+    
+    cari_judul=[x.get_text() for x in judul]
+    cari_luas_bangunan=[x.get_text() for x in luas_bangunan]
+    cari_luas_bangunan=[x.get_text() for x in luas_bangunan]
+    cari_kamar_tidur=[x.get_text() for x in kamar_tidur]
+    cari_luas_tanah=[x.get_text() for x in luas_tanah]
+    cari_kamar_mandi=[x.get_text() for x in kamar_mandi]
+    cari_harga=[x.get_text() for x in platform]
+    
+    data_judul.append(cari_judul) 
+    data_harga.append(cari_harga)    
+    data_bangunan.append(cari_luas_bangunan)
+    data_tanah.append(cari_luas_tanah)
+    data_kamar_tidur.append(cari_kamar_tidur)
+    data_kamar_mandi.append(cari_kamar_mandi)
+    
+    data_judul_baru=str(data_judul)
+    data_mandi_baru=str(data_kamar_mandi)
+    data_tidur_baru=str(data_kamar_tidur)
+    data_bangunan_baru=str(data_bangunan)
+    data_tanah_baru=str(data_tanah)
+    data_harga_baru=str(data_harga)
+    
+    nu_judul=data_judul_baru.replace('[','').replace(']','')
+    nu_data_mandi=data_mandi_baru.replace('[','').replace(']','')
+    nu_data_tidur=data_tidur_baru.replace('[','').replace(']','')
+    nu_data_tanah=data_tanah_baru.replace('[','').replace(']','').replace('m2','')
+    nu_data_bangunan=data_bangunan_baru.replace('[','').replace(']','').replace('m2','')
+    nu_data_harga=data_harga_baru.replace('[','').replace(']','').replace('Rp','')
+
+nu_judul2=pd.Series(eval(nu_judul),name='judul')    
+nu_data_mandi2=pd.Series(eval(nu_data_mandi),name='kamar mandi')
+nu_data_harga2=pd.Series(eval(nu_data_harga),name='harga')
+nu_data_tanah2=pd.Series(eval(nu_data_tanah),name='luas tanah')
+nu_data_bangunan2=pd.Series(eval(nu_data_bangunan),name='luas bangunan')
+nu_data_tidur2=pd.Series(eval(nu_data_tidur),name='kamar tidur')
+
+df = pd.concat([nu_judul2,nu_data_harga2,nu_data_bangunan2,nu_data_tanah2,nu_data_mandi2,nu_data_tidur2], axis=1)
+df
